@@ -1,68 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>OxiSynth Example</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <title>Vite + React + TS</title>
   </head>
-  <body class="blue-grey darken-4">
-    <main>
-      <div>
-        <section id="not-loaded" class="card">
-          <div class="card-content">
-            <span class="card-title">Load soundfont</span>
-            <button class="btn waves-effect" id="start" style="width: 100%">
-              Load
-            </button>
-          </div>
-        </section>
-
-        <section id="loaded" class="card" style="display: none">
-          <div class="card-content" id="note-btns"></div>
-        </section>
-      </div>
-    </main>
-
-    <style>
-      html,
-      body {
-        margin: 0px;
-        padding: 0px;
-        height: 100%;
-      }
-
-      main {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-
-        padding-bottom: 80px;
-      }
-
-      #loaded {
-        animation: show 1s;
-      }
-
-      #note-btns button {
-        margin-right: 2px;
-      }
-
-      @keyframes show {
-        0% {
-          transform: translateX(200px);
-          opacity: 0;
-        }
-        100% {
-          transform: translateX(0px);
-          opacity: 1;
-        }
-      }
-    </style>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
