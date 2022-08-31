@@ -1,5 +1,8 @@
 mod utils;
 
+use std::{fs::File, io::Cursor};
+
+use oxisynth::{MidiEvent, SoundFont, SoundFontId, Synth};
 use pitch_detection::detector::{mcleod::McLeodDetector, PitchDetector};
 use wasm_bindgen::prelude::*;
 
@@ -52,5 +55,58 @@ impl WasmPitchDetector {
             Some(pitch) => pitch.frequency,
             None => 0.0,
         }
+    }
+}
+
+#[wasm_bindgen]
+pub struct WasmSoundFontSynth {
+    synth: Synth,
+    font_id: SoundFontId,
+}
+
+#[wasm_bindgen]
+impl WasmSoundFontSynth {
+    pub fn new(soundfont_bytes: &[u8]) -> WasmSoundFontSynth {
+        utils::set_panic_hook();
+
+        let mut synth = Synth::default();
+        let mut cur = Cursor::new(soundfont_bytes);
+        let font = SoundFont::load(&mut cur).unwrap();
+        let font_id = synth.add_font(font, true);
+
+        WasmSoundFontSynth { synth, font_id }
+    }
+
+    pub fn program_select(&mut self, chan: u8, bank_num: u32, preset_num: u8) {
+        self.synth
+            .program_select(chan, self.font_id, bank_num, preset_num)
+            .ok();
+    }
+
+    pub fn note_on(&mut self, channel: u8, key: u8, vel: u8) {
+        self.synth
+            .send_event(MidiEvent::NoteOn { channel, key, vel })
+            .ok();
+    }
+
+    pub fn note_off(&mut self, channel: u8, key: u8) {
+        self.synth
+            .send_event(MidiEvent::NoteOff { channel, key })
+            .ok();
+    }
+
+    pub fn read_next_block(&mut self, block_size: usize) -> JsValue {
+        let mut out = vec![
+            Vec::with_capacity(block_size),
+            Vec::with_capacity(block_size),
+        ];
+
+        for _ in 0..block_size {
+            let (l, r) = self.synth.read_next();
+            out[0].push(l);
+            out[1].push(r);
+        }
+
+        JsValue::from_serde(&out).unwrap()
     }
 }

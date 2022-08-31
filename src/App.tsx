@@ -1,25 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import { setupAudio } from "./setupAudio";
-import PitchNode from "./audioWorklet/PitchNode";
-
-function PitchReadout({
-  running,
-  latestPitch,
-}: {
-  running: boolean;
-  latestPitch: number | undefined;
-}) {
-  return (
-    <div className="Pitch-readout">
-      {latestPitch
-        ? `Latest pitch: ${latestPitch.toFixed(1)} Hz`
-        : running
-        ? "Listening..."
-        : "Paused"}
-    </div>
-  );
-}
+import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
 
 function AudioRecorderControl() {
   // Ensure the latest state of the audio module is reflected in the UI
@@ -32,7 +14,7 @@ function AudioRecorderControl() {
   //    practice to let React know about any state that _could_ change
   //    again.
   const [audio, setAudio] = useState<
-    { context: AudioContext; node: PitchNode } | undefined
+    { context: AudioContext; node: SoundFontSynthNode } | undefined
   >(undefined);
 
   // 2. running holds whether the application is currently recording and
@@ -59,7 +41,7 @@ function AudioRecorderControl() {
   }
 
   // Audio already initialized. Suspend / resume based on its current state.
-  const { context } = audio;
+  const { context, node } = audio;
   return (
     <div>
       <button
@@ -76,7 +58,12 @@ function AudioRecorderControl() {
       >
         {running ? "Pause" : "Resume"}
       </button>
-      <PitchReadout running={running} latestPitch={latestPitch} />
+      <button
+        onClick={() => node.port.postMessage({ type: "send-note-on-event" })}
+        disabled={!running}
+      >
+        Send Node On
+      </button>
     </div>
   );
 }

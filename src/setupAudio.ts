@@ -1,6 +1,6 @@
-import PitchNode from "./audioWorklet/PitchNode";
-import processorUrl from "./audioWorklet/PitchProcessor.ts?url";
+import processorUrl from "./audioWorklet/SoundFontSynthProcessor.ts?url";
 import wasmUrl from "./audioWorklet/pkg/wasm_src_bg.wasm?url";
+import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
 
 async function getWebAudioMediaStream() {
   if (!window.navigator.mediaDevices) {
@@ -36,10 +36,10 @@ async function getWebAudioMediaStream() {
 
 export async function setupAudio(onPitchDetectedCallback: any) {
   // Get the browser audio. Awaits user "allowing" it for the current tab.
-  const mediaStream = await getWebAudioMediaStream();
+  // const mediaStream = await getWebAudioMediaStream();
 
   const context = new window.AudioContext();
-  const audioSource = context.createMediaStreamSource(mediaStream);
+  // const audioSource = context.createMediaStreamSource(mediaStream);
 
   let node;
 
@@ -59,7 +59,7 @@ export async function setupAudio(onPitchDetectedCallback: any) {
 
     // Create the AudioWorkletNode which enables the main JavaScript thread to
     // communicate with the audio processor (which runs in a Worklet).
-    node = new PitchNode(context, "a");
+    node = new SoundFontSynthNode(context, "SoundFontSynthProcessor");
 
     // numAudioSamplesPerAnalysis specifies the number of consecutive audio samples that
     // the pitch detection algorithm calculates for each unit of work. Larger values tend
@@ -69,13 +69,19 @@ export async function setupAudio(onPitchDetectedCallback: any) {
     // for music analysis.
     const numAudioSamplesPerAnalysis = 1024;
 
+    const sf2Url = new URL("./assets/A320U.sf2", import.meta.url);
+    const sf2Response = await fetch(sf2Url);
+    const sf2Bytes = await sf2Response.arrayBuffer();
+
     // Send the Wasm module to the audio node which in turn passes it to the
     // processor running in the Worklet thread. Also, pass any configuration
     // parameters for the Wasm detection algorithm.
-    node.init(wasmBytes, onPitchDetectedCallback, numAudioSamplesPerAnalysis);
-
-    // Connect the audio source (microphone output) to our analysis node.
-    audioSource.connect(node);
+    node.init(
+      wasmBytes,
+      sf2Bytes,
+      onPitchDetectedCallback,
+      numAudioSamplesPerAnalysis
+    );
 
     // Connect our analysis node to the output. Required even though we do not
     // output any audio. Allows further downstream audio processing or output to
