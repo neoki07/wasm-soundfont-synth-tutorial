@@ -2,8 +2,23 @@ import { useState } from "react";
 import "./App.css";
 import { setupAudio } from "./setupAudio";
 import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
+import { Piano, KeyboardShortcuts } from "react-piano";
+import "react-piano/dist/styles.css";
 
-function AudioRecorderControl() {
+const keyboardShortcuts = [
+  ...KeyboardShortcuts.create({
+    firstNote: 36,
+    lastNote: 52,
+    keyboardConfig: KeyboardShortcuts.BOTTOM_ROW,
+  }),
+  ...KeyboardShortcuts.create({
+    firstNote: 53,
+    lastNote: 71,
+    keyboardConfig: KeyboardShortcuts.QWERTY_ROW,
+  }),
+];
+
+function SoundFontPlayer() {
   // Ensure the latest state of the audio module is reflected in the UI
   // by defining some variables (and a setter function for updating them)
   // that are managed by React, passing their initial values to useState.
@@ -23,7 +38,6 @@ function AudioRecorderControl() {
 
   // 3. latestPitch holds the latest detected pitch to be displayed in
   //    the UI.
-  const [latestPitch, setLatestPitch] = useState(undefined);
 
   // Initial state. Initialize the web audio once a user gesture on the page
   // has been registered.
@@ -31,11 +45,11 @@ function AudioRecorderControl() {
     return (
       <button
         onClick={async () => {
-          setAudio(await setupAudio(setLatestPitch));
+          setAudio(await setupAudio());
           setRunning(true);
         }}
       >
-        Start listening
+        Start
       </button>
     );
   }
@@ -58,12 +72,28 @@ function AudioRecorderControl() {
       >
         {running ? "Pause" : "Resume"}
       </button>
-      <button
-        onClick={() => node.port.postMessage({ type: "send-note-on-event" })}
-        disabled={!running}
-      >
-        Send Node On
-      </button>
+      <Piano
+        noteRange={{ first: 36, last: 71 }}
+        playNote={(midiNumber: number) => {
+          if (!running) return;
+          node.port.postMessage({
+            type: "send-note-on-event",
+            channel: 0,
+            key: midiNumber,
+            vel: 100,
+          });
+        }}
+        stopNote={(midiNumber: number) => {
+          if (!running) return;
+          node.port.postMessage({
+            type: "send-note-off-event",
+            channel: 0,
+            key: midiNumber,
+          });
+        }}
+        width={1000}
+        keyboardShortcuts={keyboardShortcuts}
+      />
     </div>
   );
 }
@@ -71,9 +101,9 @@ function AudioRecorderControl() {
 function App() {
   return (
     <div className="App">
-      <header className="App-header">Wasm Audio Tutorial</header>
+      <header className="App-header">Wasm SoundFont Synth Tutorial</header>
       <div className="App-content">
-        <AudioRecorderControl />
+        <SoundFontPlayer />
       </div>
     </div>
   );

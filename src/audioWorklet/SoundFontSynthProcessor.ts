@@ -38,10 +38,10 @@ class SoundFontSynthProcessor extends AudioWorkletProcessor {
       this.synth = WasmSoundFontSynth.new(new Uint8Array(this.sf2Bytes));
     } else if (event.type === "send-note-on-event") {
       if (!this.synth) return;
-      this.synth.note_on(0, 60, 100);
+      this.synth.note_on(event.channel, event.key, event.vel);
     } else if (event.type === "send-note-off-event") {
       if (!this.synth) return;
-      this.synth.note_off(0, 60);
+      this.synth.note_off(event.channel, event.key);
     }
   }
 
@@ -54,10 +54,9 @@ class SoundFontSynthProcessor extends AudioWorkletProcessor {
     const outputChannels = outputs[0];
     const blockSize = outputChannels[0].length;
 
-    let output = this.synth.read_next_block(blockSize);
-    console.log("output:", output);
-    outputChannels[0].set(output[0]);
-    outputChannels.length > 1 && outputChannels[1].set(output[1]);
+    let next_block = this.synth.read_next_block(blockSize);
+    outputChannels[0].set(next_block[0]);
+    outputChannels.length > 1 && outputChannels[1].set(next_block[1]);
 
     // Returning true tells the Audio system to keep going.
     return true;

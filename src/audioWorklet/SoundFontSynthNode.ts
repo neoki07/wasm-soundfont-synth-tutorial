@@ -1,7 +1,4 @@
 export default class SoundFontSynthNode extends AudioWorkletNode {
-  onPitchDetectedCallback: any;
-  numAudioSamplesPerAnalysis: any;
-
   /**
    * Initialize the Audio processor by sending the fetched WebAssembly module to
    * the processor worklet.
@@ -11,15 +8,7 @@ export default class SoundFontSynthNode extends AudioWorkletNode {
    * @param {number} numAudioSamplesPerAnalysis Number of audio samples used
    * for each analysis. Must be a power of 2.
    */
-  init(
-    wasmBytes: any,
-    sf2Bytes: any,
-    onPitchDetectedCallback: any,
-    numAudioSamplesPerAnalysis: any
-  ) {
-    this.onPitchDetectedCallback = onPitchDetectedCallback;
-    this.numAudioSamplesPerAnalysis = numAudioSamplesPerAnalysis;
-
+  init(wasmBytes: any, sf2Bytes: any) {
     // Listen to messages sent from the audio processor.
     this.port.onmessage = (event) => this.onmessage(event.data);
 
@@ -45,11 +34,7 @@ export default class SoundFontSynthNode extends AudioWorkletNode {
       this.port.postMessage({
         type: "init-detector",
         sampleRate: this.context.sampleRate,
-        numAudioSamplesPerAnalysis: this.numAudioSamplesPerAnalysis,
       });
-    } else if (event.type === "pitch") {
-      // A pitch was detected. Invoke our callback which will result in the UI updating.
-      this.onPitchDetectedCallback(event.pitch);
     }
   }
 }

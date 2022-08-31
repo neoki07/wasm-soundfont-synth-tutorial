@@ -2,39 +2,7 @@ import processorUrl from "./audioWorklet/SoundFontSynthProcessor.ts?url";
 import wasmUrl from "./audioWorklet/pkg/wasm_src_bg.wasm?url";
 import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
 
-async function getWebAudioMediaStream() {
-  if (!window.navigator.mediaDevices) {
-    throw new Error(
-      "This browser does not support web audio or it is not enabled."
-    );
-  }
-
-  try {
-    const result = await window.navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false,
-    });
-
-    return result;
-  } catch (e: any) {
-    switch (e.name) {
-      case "NotAllowedError":
-        throw new Error(
-          "A recording device was found but has been disallowed for this application. Enable the device in the browser settings."
-        );
-
-      case "NotFoundError":
-        throw new Error(
-          "No recording device was found. Please attach a microphone and click Retry."
-        );
-
-      default:
-        throw e;
-    }
-  }
-}
-
-export async function setupAudio(onPitchDetectedCallback: any) {
+export async function setupAudio() {
   // Get the browser audio. Awaits user "allowing" it for the current tab.
   // const mediaStream = await getWebAudioMediaStream();
 
@@ -61,14 +29,6 @@ export async function setupAudio(onPitchDetectedCallback: any) {
     // communicate with the audio processor (which runs in a Worklet).
     node = new SoundFontSynthNode(context, "SoundFontSynthProcessor");
 
-    // numAudioSamplesPerAnalysis specifies the number of consecutive audio samples that
-    // the pitch detection algorithm calculates for each unit of work. Larger values tend
-    // to produce slightly more accurate results but are more expensive to compute and
-    // can lead to notes being missed in faster passages i.e. where the music note is
-    // changing rapidly. 1024 is usually a good balance between efficiency and accuracy
-    // for music analysis.
-    const numAudioSamplesPerAnalysis = 1024;
-
     const sf2Url = new URL("./assets/A320U.sf2", import.meta.url);
     const sf2Response = await fetch(sf2Url);
     const sf2Bytes = await sf2Response.arrayBuffer();
@@ -76,12 +36,7 @@ export async function setupAudio(onPitchDetectedCallback: any) {
     // Send the Wasm module to the audio node which in turn passes it to the
     // processor running in the Worklet thread. Also, pass any configuration
     // parameters for the Wasm detection algorithm.
-    node.init(
-      wasmBytes,
-      sf2Bytes,
-      onPitchDetectedCallback,
-      numAudioSamplesPerAnalysis
-    );
+    node.init(wasmBytes, sf2Bytes);
 
     // Connect our analysis node to the output. Required even though we do not
     // output any audio. Allows further downstream audio processing or output to
