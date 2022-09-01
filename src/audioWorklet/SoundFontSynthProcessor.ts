@@ -36,12 +36,21 @@ class SoundFontSynthProcessor extends AudioWorkletProcessor {
       }
 
       this.synth = WasmSoundFontSynth.new(new Uint8Array(this.sf2Bytes));
+
+      this.port.postMessage({ type: "synth-initialized" });
     } else if (event.type === "send-note-on-event") {
       if (!this.synth) return;
       this.synth.note_on(event.channel, event.key, event.vel);
     } else if (event.type === "send-note-off-event") {
       if (!this.synth) return;
       this.synth.note_off(event.channel, event.key);
+    } else if (event.type === "get-preset-names") {
+      if (!this.synth) return;
+      const presetNames = this.synth.get_preset_names();
+      this.port.postMessage({ type: "preset-names-got", presetNames });
+    } else if (event.type === "program-select") {
+      if (!this.synth) return;
+      this.synth.program_select(0, 0, event.preset_num);
     }
   }
 

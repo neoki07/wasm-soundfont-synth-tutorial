@@ -36,6 +36,8 @@ function SoundFontPlayer() {
   //    processing audio and is used to provide button text (Start vs Stop).
   const [running, setRunning] = useState(false);
 
+  const [presetNames, setPresetNames] = useState([]);
+
   // 3. latestPitch holds the latest detected pitch to be displayed in
   //    the UI.
 
@@ -45,7 +47,7 @@ function SoundFontPlayer() {
     return (
       <button
         onClick={async () => {
-          setAudio(await setupAudio());
+          setAudio(await setupAudio(setPresetNames));
           setRunning(true);
         }}
       >
@@ -56,6 +58,7 @@ function SoundFontPlayer() {
 
   // Audio already initialized. Suspend / resume based on its current state.
   const { context, node } = audio;
+
   return (
     <div>
       <button
@@ -72,6 +75,23 @@ function SoundFontPlayer() {
       >
         {running ? "Pause" : "Resume"}
       </button>
+
+      <select
+        onChange={(e) => {
+          if (!running) return;
+          node.port.postMessage({
+            type: "program-select",
+            preset_num: Number(e.target.value),
+          });
+        }}
+      >
+        {presetNames.map((presetName, index) => (
+          <option key={index} value={index}>
+            {presetName}
+          </option>
+        ))}
+      </select>
+
       <Piano
         noteRange={{ first: 36, last: 71 }}
         playNote={(midiNumber: number) => {

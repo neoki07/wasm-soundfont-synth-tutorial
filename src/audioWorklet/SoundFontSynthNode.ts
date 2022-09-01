@@ -1,4 +1,6 @@
 export default class SoundFontSynthNode extends AudioWorkletNode {
+  setPresetNames: any;
+
   /**
    * Initialize the Audio processor by sending the fetched WebAssembly module to
    * the processor worklet.
@@ -8,7 +10,7 @@ export default class SoundFontSynthNode extends AudioWorkletNode {
    * @param {number} numAudioSamplesPerAnalysis Number of audio samples used
    * for each analysis. Must be a power of 2.
    */
-  init(wasmBytes: any, sf2Bytes: any) {
+  init(wasmBytes: any, sf2Bytes: any, setPresetNames: any) {
     // Listen to messages sent from the audio processor.
     this.port.onmessage = (event) => this.onmessage(event.data);
 
@@ -17,6 +19,8 @@ export default class SoundFontSynthNode extends AudioWorkletNode {
       wasmBytes,
       sf2Bytes,
     });
+
+    this.setPresetNames = setPresetNames;
   }
 
   // Handle an uncaught exception thrown in the PitchProcessor.
@@ -35,6 +39,12 @@ export default class SoundFontSynthNode extends AudioWorkletNode {
         type: "init-detector",
         sampleRate: this.context.sampleRate,
       });
+    } else if (event.type === "synth-initialized") {
+      this.port.postMessage({
+        type: "get-preset-names",
+      });
+    } else if (event.type === "preset-names-got") {
+      this.setPresetNames(event.presetNames);
     }
   }
 }

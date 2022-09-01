@@ -4,6 +4,7 @@ use std::{fs::File, io::Cursor};
 
 use oxisynth::{MidiEvent, SoundFont, SoundFontId, Synth};
 use pitch_detection::detector::{mcleod::McLeodDetector, PitchDetector};
+use soundfont::data::PresetHeader;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -62,6 +63,7 @@ impl WasmPitchDetector {
 pub struct WasmSoundFontSynth {
     synth: Synth,
     font_id: SoundFontId,
+    preset_names: Vec<String>,
 }
 
 #[wasm_bindgen]
@@ -74,7 +76,24 @@ impl WasmSoundFontSynth {
         let font = SoundFont::load(&mut cur).unwrap();
         let font_id = synth.add_font(font, true);
 
-        WasmSoundFontSynth { synth, font_id }
+        let sf2 = soundfont::SoundFont2::load(&mut cur).unwrap();
+        let mut preset_headers = sf2
+            .presets
+            .iter()
+            .map(|p| p.header.clone())
+            .collect::<Vec<PresetHeader>>();
+        preset_headers.sort_by(|a, b| a.preset.cmp(&b.preset));
+        let preset_names = preset_headers.iter().map(|h| h.name.clone()).collect();
+
+        WasmSoundFontSynth {
+            synth,
+            font_id,
+            preset_names,
+        }
+    }
+
+    pub fn get_preset_names(&self) -> JsValue {
+        JsValue::from_serde(&self.preset_names).unwrap()
     }
 
     pub fn program_select(&mut self, chan: u8, bank_num: u32, preset_num: u8) {

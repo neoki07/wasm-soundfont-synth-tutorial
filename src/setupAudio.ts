@@ -2,7 +2,7 @@ import processorUrl from "./audioWorklet/SoundFontSynthProcessor.ts?url";
 import wasmUrl from "./audioWorklet/pkg/wasm_src_bg.wasm?url";
 import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
 
-export async function setupAudio() {
+export async function setupAudio(setPresetNames: any) {
   // Get the browser audio. Awaits user "allowing" it for the current tab.
   // const mediaStream = await getWebAudioMediaStream();
 
@@ -36,7 +36,7 @@ export async function setupAudio() {
     // Send the Wasm module to the audio node which in turn passes it to the
     // processor running in the Worklet thread. Also, pass any configuration
     // parameters for the Wasm detection algorithm.
-    node.init(wasmBytes, sf2Bytes);
+    node.init(wasmBytes, sf2Bytes, setPresetNames);
 
     // Connect our analysis node to the output. Required even though we do not
     // output any audio. Allows further downstream audio processing or output to
