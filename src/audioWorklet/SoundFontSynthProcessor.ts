@@ -1,7 +1,6 @@
 import "./TextEncoder.js";
 
 import init, { WasmSoundFontSynth } from "./pkg/wasm_src";
-import soundFontPath from "../../testdata/A320U.sf2?url";
 
 class SoundFontSynthProcessor extends AudioWorkletProcessor {
   samples: any;
@@ -27,8 +26,7 @@ class SoundFontSynthProcessor extends AudioWorkletProcessor {
         this.port.postMessage({ type: "wasm-module-loaded" });
       });
       this.sf2Bytes = event.sf2Bytes;
-      console.log("this.sf2Bytes:", this.sf2Bytes);
-    } else if (event.type === "init-detector") {
+    } else if (event.type === "init-synth") {
       const { sampleRate } = event;
 
       if (!this.sf2Bytes) {

@@ -36,7 +36,7 @@ export default class SoundFontSynthNode extends AudioWorkletNode {
       // AudioWorklet thread and compiled. This is our cue to configure the pitch
       // detector.
       this.port.postMessage({
-        type: "init-detector",
+        type: "init-synth",
         sampleRate: this.context.sampleRate,
       });
     } else if (event.type === "synth-initialized") {
