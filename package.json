@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "build-wasm": "rimraf src/audioworklet/pkg && cd wasm-src && wasm-pack build --target web --out-dir ../src/audioworklet/pkg",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
@@ -18,6 +19,7 @@
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.0.1",
+    "rimraf": "^3.0.2",
     "typescript": "^4.6.4",
     "vite": "^3.0.7"
   }
