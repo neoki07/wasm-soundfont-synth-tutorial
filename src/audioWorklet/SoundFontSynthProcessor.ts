@@ -35,7 +35,10 @@ class SoundFontSynthProcessor extends AudioWorkletProcessor {
         console.warn("sf2Bytes is undefined");
       }
 
-      this.synth = WasmSoundFontSynth.new(new Uint8Array(this.sf2Bytes));
+      this.synth = WasmSoundFontSynth.new(
+        new Uint8Array(this.sf2Bytes),
+        sampleRate
+      );
 
       this.port.postMessage({ type: "synth-initialized" });
     } else if (event.type === "send-note-on-event") {

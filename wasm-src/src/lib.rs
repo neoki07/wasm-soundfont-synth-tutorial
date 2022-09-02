@@ -2,7 +2,7 @@ mod utils;
 
 use std::io::Cursor;
 
-use oxisynth::{MidiEvent, SoundFont, SoundFontId, Synth};
+use oxisynth::{MidiEvent, SoundFont, SoundFontId, Synth, SynthDescriptor};
 use pitch_detection::detector::{mcleod::McLeodDetector, PitchDetector};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
@@ -86,10 +86,15 @@ pub struct WasmSoundFontSynth {
 
 #[wasm_bindgen]
 impl WasmSoundFontSynth {
-    pub fn new(soundfont_bytes: &[u8]) -> WasmSoundFontSynth {
+    pub fn new(soundfont_bytes: &[u8], sample_rate: f32) -> WasmSoundFontSynth {
         utils::set_panic_hook();
 
-        let mut synth = Synth::default();
+        let mut synth = Synth::new(SynthDescriptor {
+            sample_rate,
+            ..Default::default()
+        })
+        .unwrap();
+
         let mut cur = Cursor::new(soundfont_bytes);
         let font = SoundFont::load(&mut cur).unwrap();
         let font_id = synth.add_font(font, true);
