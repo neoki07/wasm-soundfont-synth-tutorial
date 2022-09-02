@@ -108,7 +108,7 @@ impl WasmSoundFontSynth {
                 morphology: p.header.morphology,
             })
             .collect::<Vec<SerializablePresetHeader>>();
-        preset_headers.sort_by(|a, b| a.preset.cmp(&b.preset));
+        preset_headers.sort_by(|a, b| a.bank.cmp(&b.bank).then(a.preset.cmp(&b.preset)));
 
         WasmSoundFontSynth {
             synth,
