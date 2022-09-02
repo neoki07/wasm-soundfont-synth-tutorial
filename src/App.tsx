@@ -36,7 +36,7 @@ function SoundFontPlayer() {
   //    processing audio and is used to provide button text (Start vs Stop).
   const [running, setRunning] = useState(false);
 
-  const [presetNames, setPresetNames] = useState([]);
+  const [presetHeaders, setPresetHeaders] = useState([]);
 
   // 3. latestPitch holds the latest detected pitch to be displayed in
   //    the UI.
@@ -47,7 +47,7 @@ function SoundFontPlayer() {
     return (
       <button
         onClick={async () => {
-          setAudio(await setupAudio(setPresetNames));
+          setAudio(await setupAudio(setPresetHeaders));
           setRunning(true);
         }}
       >
@@ -79,15 +79,18 @@ function SoundFontPlayer() {
       <select
         onChange={(e) => {
           if (!running) return;
+
+          const presetIndex = Number(e.target.value);
           node.port.postMessage({
             type: "program-select",
-            preset_num: Number(e.target.value),
+            preset_num: (presetHeaders[presetIndex] as any).preset,
+            bank_num: (presetHeaders[presetIndex] as any).bank,
           });
         }}
       >
-        {presetNames.map((presetName, index) => (
+        {presetHeaders.map((presetHeader: any, index) => (
           <option key={index} value={index}>
-            {presetName}
+            {index} {presetHeader.name}
           </option>
         ))}
       </select>

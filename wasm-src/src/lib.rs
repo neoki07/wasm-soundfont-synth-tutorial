@@ -1,10 +1,10 @@
 mod utils;
 
-use std::{fs::File, io::Cursor};
+use std::io::Cursor;
 
 use oxisynth::{MidiEvent, SoundFont, SoundFontId, Synth};
 use pitch_detection::detector::{mcleod::McLeodDetector, PitchDetector};
-use soundfont::data::PresetHeader;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -59,11 +59,29 @@ impl WasmPitchDetector {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct SerializablePresetHeader {
+    /// The name of the preset
+    pub name: String,
+    /// The MIDI preset number which to apply to the preset.
+    pub preset: u16,
+    /// The preset bank
+    pub bank: u16,
+    pub bag_id: u16,
+
+    /// Reserved?
+    pub library: u32,
+    /// Reserved?
+    pub genre: u32,
+    /// Reserved?
+    pub morphology: u32,
+}
+
 #[wasm_bindgen]
 pub struct WasmSoundFontSynth {
     synth: Synth,
     font_id: SoundFontId,
-    preset_names: Vec<String>,
+    preset_headers: Vec<SerializablePresetHeader>,
 }
 
 #[wasm_bindgen]
@@ -80,20 +98,27 @@ impl WasmSoundFontSynth {
         let mut preset_headers = sf2
             .presets
             .iter()
-            .map(|p| p.header.clone())
-            .collect::<Vec<PresetHeader>>();
+            .map(|p| SerializablePresetHeader {
+                name: p.header.name.clone(),
+                preset: p.header.preset,
+                bank: p.header.bank,
+                bag_id: p.header.bag_id,
+                library: p.header.library,
+                genre: p.header.genre,
+                morphology: p.header.morphology,
+            })
+            .collect::<Vec<SerializablePresetHeader>>();
         preset_headers.sort_by(|a, b| a.preset.cmp(&b.preset));
-        let preset_names = preset_headers.iter().map(|h| h.name.clone()).collect();
 
         WasmSoundFontSynth {
             synth,
             font_id,
-            preset_names,
+            preset_headers,
         }
     }
 
-    pub fn get_preset_names(&self) -> JsValue {
-        JsValue::from_serde(&self.preset_names).unwrap()
+    pub fn get_preset_headers(&self) -> JsValue {
+        JsValue::from_serde(&self.preset_headers).unwrap()
     }
 
     pub fn program_select(&mut self, chan: u8, bank_num: u32, preset_num: u8) {

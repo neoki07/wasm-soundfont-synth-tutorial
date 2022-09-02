@@ -44,13 +44,14 @@ class SoundFontSynthProcessor extends AudioWorkletProcessor {
     } else if (event.type === "send-note-off-event") {
       if (!this.synth) return;
       this.synth.note_off(event.channel, event.key);
-    } else if (event.type === "get-preset-names") {
+    } else if (event.type === "get-preset-headers") {
       if (!this.synth) return;
-      const presetNames = this.synth.get_preset_names();
-      this.port.postMessage({ type: "preset-names-got", presetNames });
+      const presetHeaders = this.synth.get_preset_headers();
+      console.log("get_preset_headers:", presetHeaders);
+      this.port.postMessage({ type: "preset-headers-got", presetHeaders });
     } else if (event.type === "program-select") {
       if (!this.synth) return;
-      this.synth.program_select(0, 0, event.preset_num);
+      this.synth.program_select(0, event.bank_num, event.preset_num);
     }
   }
 
