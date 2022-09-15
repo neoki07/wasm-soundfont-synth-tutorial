@@ -6,6 +6,7 @@ use oxisynth::{MidiEvent, SoundFont, SoundFontId, Synth, SynthDescriptor};
 use pitch_detection::detector::{mcleod::McLeodDetector, PitchDetector};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+use web_sys::console::log_1;
 
 #[wasm_bindgen]
 pub struct WasmPitchDetector {
@@ -132,13 +133,15 @@ impl WasmSoundFontSynth {
             .ok();
     }
 
-    pub fn note_on(&mut self, channel: u8, key: u8, vel: u8) {
+    pub fn note_on(&mut self, channel: u8, key: u8, vel: u8, delay_time: usize) {
+        log_1(&JsValue::from(format!("get delay_time: {}", delay_time)));
         self.synth
             .send_event(MidiEvent::NoteOn { channel, key, vel })
             .ok();
     }
 
-    pub fn note_off(&mut self, channel: u8, key: u8) {
+    pub fn note_off(&mut self, channel: u8, key: u8, delay_time: usize) {
+        log_1(&JsValue::from(format!("get delay_time: {}", delay_time)));
         self.synth
             .send_event(MidiEvent::NoteOff { channel, key })
             .ok();
