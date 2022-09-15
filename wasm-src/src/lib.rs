@@ -60,6 +60,11 @@ impl WasmPitchDetector {
     }
 }
 
+struct ScheduledMidiEvent {
+    frame: usize,
+    event: MidiEvent,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct SerializablePresetHeader {
     /// The name of the preset
@@ -83,6 +88,8 @@ pub struct WasmSoundFontSynth {
     synth: Synth,
     font_id: SoundFontId,
     preset_headers: Vec<SerializablePresetHeader>,
+    current_frame: usize,
+    scheduled_events: Vec<ScheduledMidiEvent>,
 }
 
 #[wasm_bindgen]
@@ -120,6 +127,8 @@ impl WasmSoundFontSynth {
             synth,
             font_id,
             preset_headers,
+            current_frame: 0,
+            scheduled_events: vec![],
         }
     }
 
@@ -133,21 +142,74 @@ impl WasmSoundFontSynth {
             .ok();
     }
 
-    pub fn note_on(&mut self, channel: u8, key: u8, vel: u8, delay_time: usize) {
-        log_1(&JsValue::from(format!("get delay_time: {}", delay_time)));
+    pub fn note_on(&mut self, channel: u8, key: u8, vel: u8, delay_frame: Option<usize>) {
+        if let Some(delay_frame) = delay_frame {
+            let frame = self.current_frame + delay_frame;
+            let idx = self.scheduled_events.partition_point(|e| e.frame > frame);
+
+            self.scheduled_events.insert(
+                idx,
+                ScheduledMidiEvent {
+                    frame,
+                    event: MidiEvent::NoteOn { channel, key, vel },
+                },
+            );
+        } else {
+            self.note_on_immediately(channel, key, vel);
+        }
+    }
+
+    fn note_on_immediately(&mut self, channel: u8, key: u8, vel: u8) {
         self.synth
             .send_event(MidiEvent::NoteOn { channel, key, vel })
             .ok();
     }
 
-    pub fn note_off(&mut self, channel: u8, key: u8, delay_time: usize) {
-        log_1(&JsValue::from(format!("get delay_time: {}", delay_time)));
+    pub fn note_off(&mut self, channel: u8, key: u8, delay_frame: Option<usize>) {
+        if let Some(delay_frame) = delay_frame {
+            let frame = self.current_frame + delay_frame;
+            let idx = self.scheduled_events.partition_point(|e| e.frame > frame);
+
+            self.scheduled_events.insert(
+                idx,
+                ScheduledMidiEvent {
+                    frame,
+                    event: MidiEvent::NoteOff { channel, key },
+                },
+            );
+        } else {
+            self.note_off_immediately(channel, key);
+        }
+    }
+
+    fn note_off_immediately(&mut self, channel: u8, key: u8) {
         self.synth
             .send_event(MidiEvent::NoteOff { channel, key })
             .ok();
     }
 
+    fn process_scheduled_events(&mut self) {
+        while let Some(event) = self.scheduled_events.last() {
+            if event.frame > self.current_frame {
+                break;
+            }
+
+            match event.event {
+                MidiEvent::NoteOn { channel, key, vel } => {
+                    self.note_on_immediately(channel, key, vel)
+                }
+                MidiEvent::NoteOff { channel, key } => self.note_off_immediately(channel, key),
+                _ => (),
+            }
+
+            self.scheduled_events.pop();
+        }
+    }
+
     pub fn read_next_block(&mut self, block_size: usize) -> JsValue {
+        self.current_frame += block_size;
+        self.process_scheduled_events();
+
         let mut out = vec![
             Vec::with_capacity(block_size),
             Vec::with_capacity(block_size),
