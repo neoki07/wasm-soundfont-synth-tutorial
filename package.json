@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build-wasm": "rimraf src/audioworklet/pkg && cd wasm-src && wasm-pack build --target web --out-dir ../src/audioworklet/pkg",
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "yarn build-wasm && vite",
+    "build": "yarn build-wasm && tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
