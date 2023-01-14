@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import { setupAudio } from "./setupAudio";
 import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
+// @ts-ignore
 import { Piano, KeyboardShortcuts } from "react-piano";
 import "react-piano/dist/styles.css";
 
