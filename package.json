@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build:wasm": "cd wasm-src && rimraf ./wasm-build && wasm-pack build --target web --out-dir ./wasm-build",
+    "build:wasm": "cd wasm-src && rimraf ./wasm-build && $HOME/.cargo/bin/wasm-pack build --target web --out-dir ./wasm-build",
     "dev": "yarn build:wasm && vite",
     "build": "yarn build:wasm && tsc && vite build",
     "preview": "vite preview"
