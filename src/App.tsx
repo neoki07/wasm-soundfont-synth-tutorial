@@ -104,7 +104,7 @@ function SoundFontPlayer() {
             channel: 0,
             key: midiNumber,
             vel: 100,
-            delayTime: 1,
+            delayTime: 0,
           });
         }}
         stopNote={(midiNumber: number) => {
@@ -113,7 +113,7 @@ function SoundFontPlayer() {
             type: "send-note-off-event",
             channel: 0,
             key: midiNumber,
-            delayTime: 1,
+            delayTime: 0,
           });
         }}
         width={1000}
