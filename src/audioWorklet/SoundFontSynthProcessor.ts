@@ -1,6 +1,6 @@
 import "./TextEncoder.js";
 
-import init, { WasmSoundFontSynth } from "wasm";
+import init, { WasmSoundFontSynth } from "../wasm-build";
 
 class SoundFontSynthProcessor extends AudioWorkletProcessor {
   samples: any;

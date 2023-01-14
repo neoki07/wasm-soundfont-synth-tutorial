@@ -1,4 +1,4 @@
-import wasmUrl from "wasm/wasm_src_bg.wasm?url";
+import wasmUrl from "./wasm-build/wasm_src_bg.wasm?url";
 import processorUrl from "./audioWorklet/SoundFontSynthProcessor.ts?url";
 import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
 

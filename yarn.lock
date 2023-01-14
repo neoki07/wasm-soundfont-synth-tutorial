@@ -1924,7 +1924,6 @@ __metadata:
     rimraf: ^3.0.2
     typescript: ^4.6.4
     vite: ^3.0.7
-    wasm: "file:./wasm-src/wasm-build"
   languageName: unknown
   linkType: soft
 
@@ -2029,13 +2028,6 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: ad35b7008c2b62a167d1d1a82f0a0c60fa457733f1969e9eedf0b0077f67a7ac74b4c9477e75a397895150f09b6551f0c17841c5b05c34d9fe302bb0b5dc28a8
-  languageName: node
-  linkType: hard
-
-"wasm@file:./wasm-src/wasm-build::locator=test%40workspace%3A.":
-  version: 0.1.0
-  resolution: "wasm@file:./wasm-src/wasm-build#./wasm-src/wasm-build::hash=1e2e74&locator=test%40workspace%3A."
-  checksum: ed8cf2505a4fd2095a47c86e58db93ef9c19476ef88f9805f32e2d5a40e848ada4d8ecaa2fd95aa2803eef6a1640fd388de710a18a83a5de840388e3d7c653c3
   languageName: node
   linkType: hard
 
