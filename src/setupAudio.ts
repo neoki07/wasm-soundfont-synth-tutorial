@@ -1,5 +1,5 @@
+import wasmUrl from "wasm/wasm_src_bg.wasm?url";
 import processorUrl from "./audioWorklet/SoundFontSynthProcessor.ts?url";
-import wasmUrl from "./audioWorklet/pkg/wasm_src_bg.wasm?url";
 import SoundFontSynthNode from "./audioWorklet/SoundFontSynthNode";
 
 export async function setupAudio(setPresetHeaders: any) {
