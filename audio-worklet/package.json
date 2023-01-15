@@ -1,0 +1,19 @@
+{
+  "name": "vite-audio-worklet-wasm-soundfont-player",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "build:wasm": "cd wasm && wasm-pack build --release --target web"
+  },
+  "devDependencies": {
+    "@types/audioworklet": "^0.0.36",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.0"
+  },
+  "dependencies": {
+    "react-piano": "^3.1.3"
+  }
+}
