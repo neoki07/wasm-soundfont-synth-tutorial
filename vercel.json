@@ -1,4 +1,3 @@
 {
-  "buildCommand": "pnpm build:wasm && pnpm build",
   "installCommand": "bash vercel-install.sh"
 }
